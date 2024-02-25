@@ -1,0 +1,111 @@
+{
+	"name": "AddressFlow",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "4dn-synapse-WorkspaceDefaultStorage",
+						"type": "LinkedServiceReference"
+					},
+					"name": "CustomersCsv",
+					"description": "Read Customers Data"
+				},
+				{
+					"linkedService": {
+						"referenceName": "SqlPool",
+						"type": "LinkedServiceReference"
+					},
+					"name": "DimGeo"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "SqlPool",
+						"type": "LinkedServiceReference"
+					},
+					"name": "DimGeo1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "City"
+				},
+				{
+					"name": "Distinct"
+				},
+				{
+					"name": "CityNotExists"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          Id as long,",
+				"          FirstName as string,",
+				"          LastName as string,",
+				"          CompanyName as string,",
+				"          StreetName as string,",
+				"          Number as integer,",
+				"          City as string,",
+				"          Region as string,",
+				"          Country as string",
+				"     ),",
+				"     useSchema: false,",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delimited',",
+				"     fileSystem: 'files',",
+				"     columnDelimiter: ',',",
+				"     escapeChar: '\\\\',",
+				"     quoteChar: '\\\"',",
+				"     columnNamesAsHeader: true,",
+				"     wildcardPaths:['sales_small/csv/customers*.csv']) ~> CustomersCsv",
+				"source(output(",
+				"          Id as long,",
+				"          City as string,",
+				"          Region as string,",
+				"          Country as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table',",
+				"     store: 'synapseanalytics',",
+				"     schemaName: 'Main',",
+				"     tableName: 'DimGeo',",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     staged: true) ~> DimGeo",
+				"CustomersCsv select(mapColumn(",
+				"          City,",
+				"          Region,",
+				"          Country",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> City",
+				"City aggregate(groupBy(City),",
+				"     each(match(name!='City'), $$ = first($$))) ~> Distinct",
+				"Distinct, DimGeo exists(Distinct@City == DimGeo@City,",
+				"     negate:true,",
+				"     broadcast: 'auto')~> CityNotExists",
+				"CityNotExists sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table',",
+				"     store: 'synapseanalytics',",
+				"     schemaName: 'Main',",
+				"     tableName: 'DimGeo',",
+				"     insertable: true,",
+				"     updateable: false,",
+				"     deletable: false,",
+				"     upsertable: false,",
+				"     allowCopyCommand: true,",
+				"     staged: true,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     saveOrder: 1,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> DimGeo1"
+			]
+		}
+	}
+}

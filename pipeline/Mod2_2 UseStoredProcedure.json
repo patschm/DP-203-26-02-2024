@@ -1,0 +1,64 @@
+{
+	"name": "Mod2_2 UseStoredProcedure",
+	"properties": {
+		"activities": [
+			{
+				"name": "Delete Lake files",
+				"type": "Delete",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"enableLogging": true,
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					}
+				}
+			},
+			{
+				"name": "Create Sales Table",
+				"type": "SqlServerStoredProcedure",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
+				"dependsOn": [
+					{
+						"activity": "Delete Lake files",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[sp_create_sales]",
+					"storedProcedureParameters": {
+						"amount": {
+							"value": "100",
+							"type": "Int32"
+						}
+					}
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2024-02-11T14:54:53Z"
+	},
+	"type": "Microsoft.Synapse/workspaces/pipelines"
+}

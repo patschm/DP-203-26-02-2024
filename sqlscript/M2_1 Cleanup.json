@@ -1,0 +1,20 @@
+{
+	"name": "M2_1 Cleanup",
+	"properties": {
+		"folder": {
+			"name": "Module 2.1"
+		},
+		"content": {
+			"query": "USE SalesDB\nGO;\n\nDROP EXTERNAL TABLE Products\nDROP EXTERNAL FILE FORMAT FormatCsv\nDROP EXTERNAL DATA SOURCE csv\nDROP EXTERNAL DATA SOURCE csv2\nDROP DATABASE SCOPED CREDENTIAL sasToken",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "SalesDB",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
