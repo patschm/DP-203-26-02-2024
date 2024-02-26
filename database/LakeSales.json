@@ -1,0 +1,22 @@
+{
+	"name": "LakeSales",
+	"properties": {
+		"Name": "LakeSales",
+		"EntityType": "DATABASE",
+		"Origin": {
+			"Type": "SPARK"
+		},
+		"Properties": {
+			"IsSyMSCDMDatabase": true
+		},
+		"Source": {
+			"Provider": "ADLS",
+			"Location": "abfss://files@d4ndemostorage.dfs.core.windows.net/testdata/csv",
+			"Properties": {
+				"FormatType": "csv",
+				"LinkedServiceName": "4dnsynapse-WorkspaceDefaultStorage"
+			}
+		}
+	},
+	"type": "DATABASE"
+}
